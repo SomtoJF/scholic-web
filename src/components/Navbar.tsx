@@ -17,8 +17,6 @@ const Navbar: React.FC = () => {
   const profileMatch = location.pathname.match(/^\/u\/([^/]+)/);
   const scopeUsername = profileMatch ? profileMatch[1] : undefined;
 
-  const brandFont = { fontFamily: '"Outfit", sans-serif' };
-
   const initial = user?.username?.[0]?.toUpperCase() || user?.firstName?.[0]?.toUpperCase() || '?';
 
   const toggleSearch = useCallback(() => setSearchOpen(prev => !prev), []);
@@ -38,7 +36,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav
-        className="w-full relative flex items-center justify-center"
+        className={`navbar w-full flex items-center ${searchOpen ? 'navbar-search-open' : ''}`}
         style={{
           borderBottom: '1px solid var(--border)',
           background: 'var(--nav-bg)',
@@ -47,40 +45,41 @@ const Navbar: React.FC = () => {
           padding: '0 40px',
         }}
       >
-        {/* Center: brand + search */}
-        <div className="flex items-center gap-3">
+        <div className="navbar-brand flex items-center">
           <button
-            onClick={() => navigate('/discover')}
-            className="cursor-pointer transition-colors"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: location.pathname === '/discover' ? 'var(--text)' : 'var(--text-dim)',
-              fontSize: '13px',
-              fontWeight: location.pathname === '/discover' ? 600 : 500,
-              fontFamily: 'inherit',
-              padding: '4px 6px',
-            }}
-          >
-            Discover
-          </button>
-          <span
-            className="font-semibold cursor-pointer"
-            style={{ ...brandFont, fontSize: '18px', color: 'var(--text)', letterSpacing: '-0.3px' }}
+            type="button"
+            aria-label="Go to feed"
+            title="Go to feed"
             onClick={() => navigate('/feed')}
+            className="navbar-logo cursor-pointer"
           >
-            <span style={{ color: 'var(--accent)' }}>#</span>scholic
-          </span>
+            <svg width="24" height="24" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="28" cy="10" r="5" fill="var(--color-yellow)" />
+              <circle cx="42" cy="18" r="5" fill="var(--color-orange)" />
+              <circle cx="44" cy="34" r="5" fill="var(--accent)" />
+              <circle cx="34" cy="46" r="5" fill="var(--color-blue)" />
+              <circle cx="18" cy="44" r="5" fill="var(--color-purple)" />
+              <circle cx="12" cy="28" r="5" fill="var(--color-pink)" />
+              <circle cx="18" cy="16" r="5" fill="var(--color-aqua)" />
+              <circle cx="30" cy="28" r="3.5" fill="var(--accent)" />
+            </svg>
+          </button>
+          <span className="navbar-wordmark">scholic</span>
+        </div>
+
+        <div className="navbar-search-slot flex items-center justify-center">
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 cursor-pointer transition-colors"
+            aria-label="Open search"
+            aria-expanded={searchOpen}
+            title="Search (⌘K / Ctrl+K)"
+            className={`navbar-search flex items-center cursor-pointer transition-colors ${searchOpen ? 'navbar-search-expanded' : ''}`}
             style={{
               background: 'var(--surface-2)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
-              padding: '4px 10px 4px 8px',
+              padding: '4px 8px',
               color: 'var(--text-dim)',
-              fontSize: '12px',
               fontFamily: 'inherit',
             }}
             onMouseEnter={(e) => {
@@ -93,39 +92,26 @@ const Navbar: React.FC = () => {
             }}
           >
             <Search style={{ width: 12, height: 12 }} />
-            <span>Search</span>
-            <span
-              style={{
-                fontSize: '10px',
-                fontFamily: 'monospace',
-                color: 'var(--text-faint)',
-                background: 'var(--surface-3)',
-                borderRadius: 4,
-                padding: '1px 5px',
-                marginLeft: 2,
-              }}
-            >
-              ⌘K
-            </span>
+            <span className="navbar-search-label">Search</span>
           </button>
         </div>
 
-        {/* Right side: actions */}
-        <div className="absolute right-10 flex items-center gap-4">
+        <div className="navbar-actions flex items-center gap-4">
           <button
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="theme-icon-button flex items-center justify-center rounded-full cursor-pointer"
+            className="navbar-theme theme-icon-button flex items-center justify-center rounded-full cursor-pointer"
             style={{ width: '30px', height: '30px' }}
           >
             {theme === 'dark' ? <SunMedium style={{ width: 15, height: 15 }} /> : <Moon style={{ width: 15, height: 15 }} />}
           </button>
           {user && (
             <>
-              <NotificationsMenu />
+              <div className="navbar-notifications"><NotificationsMenu /></div>
               <button
                 onClick={logout}
-                className="text-xs transition-colors cursor-pointer"
+                aria-label="Sign out"
+                className="navbar-signout text-xs transition-colors cursor-pointer"
                 style={{ color: 'var(--text-dim)' }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = 'var(--text)';
@@ -138,6 +124,8 @@ const Navbar: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate(`/u/${user.username}`)}
+                aria-label={`Open ${user.username}'s profile`}
+                title={`Open ${user.username}'s profile`}
                 className="flex items-center justify-center rounded-full overflow-hidden cursor-pointer transition-opacity hover:opacity-80"
                 style={{
                   width: '28px',
@@ -164,7 +152,7 @@ const Navbar: React.FC = () => {
           {!user && (
             <button
               onClick={login}
-              className="transition-colors cursor-pointer"
+              className="navbar-auth transition-colors cursor-pointer"
               style={{
                 padding: '8px 16px',
                 minHeight: '34px',
